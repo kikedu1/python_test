@@ -40,8 +40,33 @@ def extract_names(filename):
   followed by the name-rank strings in alphabetical order.
   ['2006', 'Aaliyah 91', Aaron 57', 'Abagail 895', ' ...]
   """
-  # +++your code here+++
-  return
+  with open(filename, 'r', encoding='utf-8') as f:
+    text = f.read()
+
+  # Extract the year
+  year_match = re.search(r'Popularity\sin\s(\d{4})', text)
+  if not year_match:
+      print("Couldn't find the year in the file")
+      return []
+  year = year_match.group(1)
+
+  # Extract the rank and names
+  tuples = re.findall(r'<tr align="right"><td>(\d+)</td><td>(\w+)</td><td>(\w+)</td>', text)
+  # tuples is a list of (rank, boyname, girlname)
+
+  names_to_rank = {}
+  for rank, boyname, girlname in tuples:
+      if boyname not in names_to_rank:
+          names_to_rank[boyname] = rank
+      if girlname not in names_to_rank:
+          names_to_rank[girlname] = rank
+
+  # Build the result list
+  result = [year]
+  for name in sorted(names_to_rank):
+      result.append(f"{name} {names_to_rank[name]}")
+
+  return result
 
 
 def main():
@@ -60,7 +85,17 @@ def main():
     summary = True
     del args[0]
 
-  # +++your code here+++
+  for filename in args:
+      names = extract_names(filename)
+      text = '\n'.join(names)  # convert list to single string
+
+      if summary:
+          # write to summary file
+          with open(filename + '.summary', 'w', encoding='utf-8') as f:
+              f.write(text + '\n')
+      else:
+          # print to console
+          print(text)
   # For each filename, get the names, then either print the text output
   # or write it to a summary file
 
